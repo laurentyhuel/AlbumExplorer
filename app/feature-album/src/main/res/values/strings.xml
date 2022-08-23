@@ -1,0 +1,5 @@
+<resources>
+    <string name="get_album_exception">Failed to get album data</string>
+    <string name="album">Album</string>
+    <string name="album_number">#%d</string>
+</resources>
