@@ -79,3 +79,9 @@ List of librairies used in project:
     - JUnit5 for unit tests
     - Mockk for mocking
     - Turbine for Flow test
+    
+    
+## Others versions:
+
+There's some others versions of this application : 
+ - Flow from data layer to presentation layer, [branch](https://github.com/laurentyhuel/test_lbc/tree/main).
