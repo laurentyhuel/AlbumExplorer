@@ -1,6 +1,7 @@
 package com.lyh.albumexplorer.feature.album
 
 import android.content.Context
+import app.cash.turbine.test
 import com.lyh.albumexplorer.domain.AlbumUseCase
 import com.lyh.albumexplorer.domain.core.ResultError
 import com.lyh.albumexplorer.domain.core.ResultException
@@ -9,7 +10,6 @@ import com.lyh.albumexplorer.domain.model.AlbumModel
 import com.lyh.albumexplorer.feature.album.list.AlbumListViewModel
 import com.lyh.albumexplorer.feature.album.util.CoroutinesTestExtension
 import com.lyh.albumexplorer.feature.album.util.InstantExecutorExtension
-import com.lyh.albumexplorer.feature.album.util.getOrAwaitValue
 import com.lyh.albumexplorer.feature.core.ResourceError
 import com.lyh.albumexplorer.feature.core.ResourceLoading
 import com.lyh.albumexplorer.feature.core.ResourceSuccess
@@ -45,86 +45,94 @@ class AlbumListViewModelTest {
     }
 
     @Test
-    fun `WHEN get albums return exception THEN observing livedata get error`() = runTest {
+    fun `WHEN get albums return exception THEN collecting flow get error`() = runTest {
 
         coEvery { albumUseCase.getAlbums() } returns flow {
             emit(ResultException(TimeoutException()))
         }
         every { context.getString(any()) } returns "error occurred"
 
-        val resultLoading = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(resultLoading is ResourceLoading)
+        albumListViewModel.albums.test {
+            val resultLoading = awaitItem()
+            assertTrue(resultLoading is ResourceLoading)
 
-        val result = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(result is ResourceError)
-        val error = result as ResourceError
-        assertEquals("error occurred", error.errorMessage.getMessage(context))
+            val result = awaitItem()
+            assertTrue(result is ResourceError)
+            val error = result as ResourceError
+            assertEquals("error occurred", error.errorMessage.getMessage(context))
+        }
     }
 
     @Test
-    fun `WHEN get albums return error THEN observing livedata get error`() = runTest {
+    fun `WHEN get albums return error THEN collecting flow get error`() = runTest {
         coEvery { albumUseCase.getAlbums() } returns flow {
             emit(ResultError(400, "Bad request"))
         }
 
-        val resultLoading = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(resultLoading is ResourceLoading)
+        albumListViewModel.albums.test {
+            val resultLoading = awaitItem()
+            assertTrue(resultLoading is ResourceLoading)
 
-        val result = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(result is ResourceError)
-        val error = result as ResourceError
-        assertEquals("Bad request", error.errorMessage.getMessage(context))
+            val result = awaitItem()
+            assertTrue(result is ResourceError)
+            val error = result as ResourceError
+            assertEquals("Bad request", error.errorMessage.getMessage(context))
+        }
+
     }
 
     @Test
-    fun `WHEN get albums return data THEN observing livedata get data`() = runTest {
+    fun `WHEN get albums return data THEN collecting flow get data`() = runTest {
         coEvery { albumUseCase.getAlbums() } returns flow {
             emit(ResultSuccess(albums))
         }
 
+        albumListViewModel.albums.test {
+            val resultLoading = awaitItem()
+            // Verify that the first value is Loading
+            assertTrue(resultLoading is ResourceLoading)
 
-        val resultLoading = albumListViewModel.albums.getOrAwaitValue()
-        // Verify that the first value is Loading
-        assertTrue(resultLoading is ResourceLoading)
-
-        val resultSuccess = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(resultSuccess is ResourceSuccess)
-        val success = resultSuccess as ResourceSuccess
-        assertEquals(albums.size, success.data.size)
-
+            val resultSuccess = awaitItem()
+            assertTrue(resultSuccess is ResourceSuccess)
+            val success = resultSuccess as ResourceSuccess
+            assertEquals(albums.size, success.data.size)
+        }
     }
 
     @Test
-    fun `WHEN retry albums return data THEN observing livedata get data`() = runTest {
+    fun `WHEN get albums after an error retry and get data THEN collecting flow get data`() = runTest {
         coEvery { albumUseCase.getAlbums() } returns flow {
             emit(ResultException(TimeoutException()))
         }
         every { context.getString(any()) } returns "error occurred"
 
-        val resultLoadingError = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(resultLoadingError is ResourceLoading)
+        albumListViewModel.albums.test {
 
-        val resultError = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(resultError is ResourceError)
-        val error = resultError as ResourceError
-        assertEquals("error occurred", error.errorMessage.getMessage(context))
 
-        coEvery { albumUseCase.getAlbums() } returns flow {
-            delay(50)
-            emit(ResultSuccess(albums))
+            val resultLoadingError = awaitItem()
+            assertTrue(resultLoadingError is ResourceLoading)
+
+            val resultError = awaitItem()
+            assertTrue(resultError is ResourceError)
+            val error = resultError as ResourceError
+            assertEquals("error occurred", error.errorMessage.getMessage(context))
+
+            coEvery { albumUseCase.getAlbums() } returns flow {
+                emit(ResultSuccess(albums))
+            }
+
+            albumListViewModel.triggerAlbums()
+
+
+            val resultLoadingSuccess = awaitItem()
+            // Verify that the first value is Loading
+            assertTrue(resultLoadingSuccess is ResourceLoading)
+
+            val resultSuccess = awaitItem()
+            assertTrue(resultSuccess is ResourceSuccess)
+            val success = resultSuccess as ResourceSuccess
+            assertEquals(albums.size, success.data.size)
         }
-
-        albumListViewModel.triggerAlbums()
-
-        val resultLoadingSuccess = albumListViewModel.albums.getOrAwaitValue()
-        // Verify that the first value is Loading
-        assertTrue(resultLoadingSuccess is ResourceLoading)
-
-        delay(50)
-        val resultSuccess = albumListViewModel.albums.getOrAwaitValue()
-        assertTrue(resultSuccess is ResourceSuccess)
-        val success = resultSuccess as ResourceSuccess
-        assertEquals(albums.size, success.data.size)
 
     }
 

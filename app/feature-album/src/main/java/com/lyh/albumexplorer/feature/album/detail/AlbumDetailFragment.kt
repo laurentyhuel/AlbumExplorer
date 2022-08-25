@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import coil.load
 import com.lyh.albumexplorer.feature.album.R
 import com.lyh.albumexplorer.feature.album.databinding.FragmentAlbumDetailBinding
@@ -14,6 +17,7 @@ import com.lyh.albumexplorer.feature.core.Resource
 import com.lyh.albumexplorer.feature.core.ResourceError
 import com.lyh.albumexplorer.feature.core.ResourceLoading
 import com.lyh.albumexplorer.feature.core.ResourceSuccess
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AlbumDetailFragment : Fragment() {
@@ -56,7 +60,11 @@ class AlbumDetailFragment : Fragment() {
             binding.layout.isVisible = false
         } else {
             binding.layout.isVisible = true
-            albumViewModel.album.observe(viewLifecycleOwner, ::bind)
+            viewLifecycleOwner.lifecycleScope.launch {
+                albumViewModel.album
+                    .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                    .collect(this@AlbumDetailFragment::bind)
+            }
             albumViewModel.setAlbumId(albumId)
         }
     }

@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.lyh.albumexplorer.feature.album.R
 import com.lyh.albumexplorer.feature.album.databinding.FragmentAlbumListBinding
@@ -14,6 +17,7 @@ import com.lyh.albumexplorer.feature.core.Resource
 import com.lyh.albumexplorer.feature.core.ResourceError
 import com.lyh.albumexplorer.feature.core.ResourceLoading
 import com.lyh.albumexplorer.feature.core.ResourceSuccess
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AlbumListFragment : Fragment() {
@@ -43,7 +47,12 @@ class AlbumListFragment : Fragment() {
         // layout configuration (layout, layout-sw600dp)
         albumDetailFragmentContainer = view.findViewById(R.id.album_detail_nav_container)
 
-        albumListViewModel.albums.observe(viewLifecycleOwner, ::bind)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            albumListViewModel.albums
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collect(this@AlbumListFragment::bind)
+        }
 
         binding.buttonRetry.setOnClickListener {
             albumListViewModel.triggerAlbums()

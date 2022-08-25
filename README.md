@@ -29,8 +29,7 @@ Clean Archi and MVVM help:
 - to have uniform way to develop
 - ...
 
-Clean Architecture stack uses Flow to stream data, ViewModels (MVVM) transform Flow to LiveData for
-UI layer.
+Clean Architecture stack uses Flow to stream data, from data layer to presentation layer.
 
 Application has a single activity which is the entry point of application. All the other screens are
 implemented using Fragments.
@@ -79,9 +78,8 @@ List of librairies used in project:
     - JUnit5 for unit tests
     - Mockk for mocking
     - Turbine for Flow test
-    
-    
+
 ## Others versions:
 
 There's some others versions of this application : 
- - Flow from data layer to presentation layer, [branch](https://github.com/laurentyhuel/test_lbc/tree/main).
+ - ViewModels (MVVM) transform Flow to LiveData for UI layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/flow-livedata).

@@ -1,8 +1,6 @@
 package com.lyh.albumexplorer.feature.album.list
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.lyh.albumexplorer.domain.AlbumUseCase
 import com.lyh.albumexplorer.domain.core.ResultError
@@ -25,10 +23,10 @@ class AlbumListViewModel(
         triggerAlbums()
     }
 
-    val albums: LiveData<Resource<List<AlbumUi>>> =
+    val albums: Flow<Resource<List<AlbumUi>>> =
         albumsTrigger.flatMapLatest {
             getAlbumFlow()
-        }.asLiveData(viewModelScope.coroutineContext)
+        }
 
     private fun getAlbumFlow(): Flow<Resource<List<AlbumUi>>> = albumUseCase.getAlbums()
         .map {

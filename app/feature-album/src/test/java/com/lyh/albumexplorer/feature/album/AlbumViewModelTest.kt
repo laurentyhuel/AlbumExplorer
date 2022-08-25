@@ -1,5 +1,6 @@
 package com.lyh.albumexplorer.feature.album
 
+import app.cash.turbine.test
 import com.lyh.albumexplorer.domain.AlbumUseCase
 import com.lyh.albumexplorer.domain.core.ResultException
 import com.lyh.albumexplorer.domain.core.ResultSuccess
@@ -7,7 +8,6 @@ import com.lyh.albumexplorer.domain.model.AlbumModel
 import com.lyh.albumexplorer.feature.album.detail.AlbumViewModel
 import com.lyh.albumexplorer.feature.album.util.CoroutinesTestExtension
 import com.lyh.albumexplorer.feature.album.util.InstantExecutorExtension
-import com.lyh.albumexplorer.feature.album.util.getOrAwaitValue
 import com.lyh.albumexplorer.feature.core.ResourceError
 import com.lyh.albumexplorer.feature.core.ResourceLoading
 import com.lyh.albumexplorer.feature.core.ResourceSuccess
@@ -34,29 +34,32 @@ class AlbumViewModelTest {
     }
 
     @Test
-    fun `WHEN get album by id THEN observing livedata get data`() = runTest {
+    fun `WHEN get album by id THEN collecting flow get data`() = runTest {
 
-        val album = createAlbumModel(5L)
+        val albumId = 5L
+        val album = createAlbumModel(albumId)
 
-        coEvery { albumUseCase.getAlbumById(5L) } returns flow { emit(ResultSuccess(album)) }
+        coEvery { albumUseCase.getAlbumById(albumId) } returns flow { emit(ResultSuccess(album)) }
 
-        albumViewModel.setAlbumId(5L)
+        albumViewModel.setAlbumId(albumId)
 
-        val resultLoading = albumViewModel.album.getOrAwaitValue()
-        assertTrue(resultLoading is ResourceLoading)
+        albumViewModel.album.test {
+            val resultLoading = awaitItem()
+            assertTrue(resultLoading is ResourceLoading)
 
-        val result = albumViewModel.album.getOrAwaitValue()
-        assertTrue(result is ResourceSuccess)
-        val albumResult = result as ResourceSuccess
-        assertEquals(5L, albumResult.data.id)
-        assertEquals("Title 5", albumResult.data.title)
+            val result = awaitItem()
+            assertTrue(result is ResourceSuccess)
+            val albumResult = result as ResourceSuccess
+            assertEquals(albumId, albumResult.data.id)
+            assertEquals(album.title, albumResult.data.title)
+        }
     }
 
     @Test
-    fun `WHEN get album by id returns exception THEN observing livedata get exception`() = runTest {
+    fun `WHEN get album by id returns exception THEN collecting flow get exception`() = runTest {
 
-
-        coEvery { albumUseCase.getAlbumById(5L) } returns flow {
+        val albumId = 5L
+        coEvery { albumUseCase.getAlbumById(albumId) } returns flow {
             emit(
                 ResultException(
                     TimeoutException()
@@ -64,13 +67,15 @@ class AlbumViewModelTest {
             )
         }
 
-        albumViewModel.setAlbumId(5L)
+        albumViewModel.setAlbumId(albumId)
 
-        val resultLoading = albumViewModel.album.getOrAwaitValue()
-        assertTrue(resultLoading is ResourceLoading)
+        albumViewModel.album.test {
+            val resultLoading = awaitItem()
+            assertTrue(resultLoading is ResourceLoading)
 
-        val result = albumViewModel.album.getOrAwaitValue()
-        assertTrue(result is ResourceError)
+            val result = awaitItem()
+            assertTrue(result is ResourceError)
+        }
     }
 
     private fun createAlbumModel(id: Long) = AlbumModel(

@@ -82,8 +82,6 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.lifecycle.livedata)
-    implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
     ksp(libs.room.compiler)
