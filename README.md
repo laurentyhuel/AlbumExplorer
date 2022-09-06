@@ -6,10 +6,13 @@ and [Guide to app architecture](https://developer.android.com/topic/architecture
 
 ## _To Do improvements_
 
-- Add [Paging library](https://developer.android.com/topic/libraries/architecture/paging/v3-overview) for RecyclerView and local datasource, by the way remote datasource is a JSon mock not paginated 😟
+- Add [Paging library](https://developer.android.com/topic/libraries/architecture/paging/v3-overview) for view and local datasource, by the way remote datasource is a JSon mock not paginated 😟
 - Add instrumented test on UI
 - Put `com.lyh.albumexplorer.feature.album.util` classes in a new module `feature-code-test`
 - Create a custom Gradle Plugin for `java-library` module, and use it instead of `com.android.library` in modules don't have Android dependencies as `data-remote`, `data`, ...
+- Create a custom Gradle Plugin for `compose` module
+- Manage [large screen] (https://developer.android.com/guide/topics/large-screens/get-started-with-large-screens) 
+- Use `SavedStateHandle` for passing parameters to screen whe [bug] (https://github.com/InsertKoinIO/koin/issues/1350) fixed 
 
 ## Architecture
 
@@ -31,8 +34,7 @@ Clean Archi and MVVM help:
 
 Clean Architecture stack uses Flow to stream data, from data layer to presentation layer.
 
-Application has a single activity which is the entry point of application. All the other screens are
-implemented using Fragments.
+UI use Jetpack Compose.
 
 ## Modularization
 
@@ -82,4 +84,5 @@ List of librairies used in project:
 ## Others versions:
 
 There's some others versions of this application : 
- - ViewModels (MVVM) transform Flow to LiveData for UI layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/flow-livedata).
+- UI with View (XML) and Flow from data layer to presentation layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/flow).
+- UI with View (XML) and ViewModels (MVVM) transform Flow to LiveData for UI layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/flow-livedata).

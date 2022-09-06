@@ -14,8 +14,14 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class AlbumViewModel(
+//    savedStateHandle: SavedStateHandle,
     private val albumUseCase: AlbumUseCase
 ) : ViewModel() {
+
+    //TODO cannot use SavedStateHandle https://github.com/InsertKoinIO/koin/issues/1350
+//    private val albumId: String = checkNotNull(
+//        savedStateHandle[AlbumDestination.albumIdArg]
+//    )
 
     private val albumIdTrigger: MutableSharedFlow<Long> = MutableSharedFlow(replay = 1)
 
@@ -23,30 +29,41 @@ class AlbumViewModel(
         albumIdTrigger.emit(id)
     }
 
-    val album: Flow<Resource<AlbumUi>> = albumIdTrigger
-        .flatMapLatest { id ->
+    val album: StateFlow<Resource<AlbumUi>> = albumIdTrigger.flatMapLatest {
+        getAlbumFlow(it)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ResourceLoading()
+    )
+
+    private fun getAlbumFlow(id: Long?): Flow<Resource<AlbumUi>> =
+        if (id == null) {
+            flow { emit(ResourceLoading()) }
+        } else {
             albumUseCase.getAlbumById(id)
-        }.map {
-            when (it) {
-                is ResultSuccess -> ResourceSuccess(it.data.toUi())
-                is ResultError -> {
-                    Timber.e("Failed to getAlbum")
-                    ResourceError(
-                        errorMessage = ErrorMessage.ErrorMessageString(
-                            it.message
-                        )
-                    )
+                .map {
+                    when (it) {
+                        is ResultSuccess -> ResourceSuccess(it.data.toUi())
+                        is ResultError -> {
+                            Timber.e("Failed to getAlbum")
+                            ResourceError(
+                                errorMessage = ErrorMessage.ErrorMessageString(
+                                    it.message
+                                )
+                            )
+                        }
+                        is ResultException -> {
+                            Timber.e(it.throwable, "Error when getAlbum")
+                            ResourceError(
+                                errorMessage = ErrorMessage.ErrorMessageResource(
+                                    R.string.get_album_exception
+                                )
+                            )
+                        }
+                    }
+                }.onStart {
+                    emit(ResourceLoading())
                 }
-                is ResultException -> {
-                    Timber.e(it.throwable, "Error when getAlbum")
-                    ResourceError(
-                        errorMessage = ErrorMessage.ErrorMessageResource(
-                            R.string.get_album_exception
-                        )
-                    )
-                }
-            }
-        }.onStart {
-            emit(ResourceLoading())
         }
 }

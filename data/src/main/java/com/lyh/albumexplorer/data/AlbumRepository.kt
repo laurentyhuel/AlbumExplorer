@@ -27,7 +27,7 @@ class AlbumRepository(
 
     private var lastFetchAlbums: Date? = null
 
-    override suspend fun getAlbumById(id: Long): Flow<Result<AlbumModel>> =
+    override fun getAlbumById(id: Long): Flow<Result<AlbumModel>> =
         flow<Result<AlbumModel>> {
             emit(ResultSuccess(albumDao.getAlbumById(id).toModel()))
         }.catch {

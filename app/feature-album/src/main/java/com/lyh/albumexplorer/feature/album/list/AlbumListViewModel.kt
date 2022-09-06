@@ -9,6 +9,7 @@ import com.lyh.albumexplorer.domain.core.ResultSuccess
 import com.lyh.albumexplorer.feature.album.mapper.toUis
 import com.lyh.albumexplorer.feature.album.model.AlbumUi
 import com.lyh.albumexplorer.feature.core.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -23,13 +24,19 @@ class AlbumListViewModel(
         triggerAlbums()
     }
 
-    val albums: Flow<Resource<List<AlbumUi>>> =
+    val albums: StateFlow<Resource<List<AlbumUi>>> =
         albumsTrigger.flatMapLatest {
-            getAlbumFlow()
-        }
+            getAlbumsFlow()
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ResourceLoading()
+        )
 
-    private fun getAlbumFlow(): Flow<Resource<List<AlbumUi>>> = albumUseCase.getAlbums()
+    private fun getAlbumsFlow(): Flow<Resource<List<AlbumUi>>> = albumUseCase.getAlbums()
         .map {
+            //TODO simulate call time
+            delay(500)
             when (it) {
                 is ResultSuccess -> ResourceSuccess(it.data.toUis())
                 is ResultError -> {

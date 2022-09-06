@@ -9,12 +9,12 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.lyh.albumexplorer"
         minSdk = 24
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "0.0.1"
 
@@ -60,7 +60,11 @@ android {
         )
     }
     buildFeatures {
-        viewBinding = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.3.0"
     }
 }
 
@@ -74,16 +78,24 @@ dependencies {
     implementation(project(":app:feature-album"))
 
     implementation(libs.androidx.core.ktx)
+
     implementation(libs.koin)
     implementation(libs.koin.android)
+    implementation(libs.koin.androidx.navigation)
+    implementation(libs.koin.androidx.compose)
+
     implementation(libs.timber)
-    implementation(libs.coil.kt)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material3)
-    implementation(libs.androidx.recyclerview)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment)
-    implementation(libs.androidx.navigation.ui)
+
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.lifecycle.viewModelCompose)
+    implementation(libs.androidx.navigation.compose)
+    
     ksp(libs.room.compiler)
 
     testImplementation(libs.turbine)

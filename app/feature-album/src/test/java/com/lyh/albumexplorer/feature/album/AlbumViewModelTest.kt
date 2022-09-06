@@ -41,12 +41,12 @@ class AlbumViewModelTest {
 
         coEvery { albumUseCase.getAlbumById(albumId) } returns flow { emit(ResultSuccess(album)) }
 
-        albumViewModel.setAlbumId(albumId)
 
         albumViewModel.album.test {
             val resultLoading = awaitItem()
             assertTrue(resultLoading is ResourceLoading)
 
+            albumViewModel.setAlbumId(albumId)
             val result = awaitItem()
             assertTrue(result is ResourceSuccess)
             val albumResult = result as ResourceSuccess
@@ -67,15 +67,16 @@ class AlbumViewModelTest {
             )
         }
 
-        albumViewModel.setAlbumId(albumId)
-
         albumViewModel.album.test {
             val resultLoading = awaitItem()
             assertTrue(resultLoading is ResourceLoading)
 
+            albumViewModel.setAlbumId(albumId)
+
             val result = awaitItem()
             assertTrue(result is ResourceError)
         }
+
     }
 
     private fun createAlbumModel(id: Long) = AlbumModel(

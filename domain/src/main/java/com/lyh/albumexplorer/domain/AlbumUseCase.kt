@@ -9,5 +9,5 @@ class AlbumUseCase(private val albumRepository: IAlbumRepository) {
 
     fun getAlbums() = albumRepository.getAlbums()
 
-    suspend fun getAlbumById(id: Long): Flow<Result<AlbumModel>> = albumRepository.getAlbumById(id)
+    fun getAlbumById(id: Long): Flow<Result<AlbumModel>> = albumRepository.getAlbumById(id)
 }
