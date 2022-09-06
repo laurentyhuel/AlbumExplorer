@@ -82,4 +82,5 @@ List of librairies used in project:
 ## Others versions:
 
 There's some others versions of this application : 
- - ViewModels (MVVM) transform Flow to LiveData for UI layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/flow-livedata).
+- UI in compose and Flow from data layer to presentation layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/main).
+- UI with View (XML) and ViewModels (MVVM) transform Flow to LiveData for UI layer, [branch](https://github.com/laurentyhuel/AlbumExplorer/tree/flow-livedata).
