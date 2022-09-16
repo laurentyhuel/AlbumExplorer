@@ -15,7 +15,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.lyh.albumexplorer.feature.album.model.AlbumUi
 import com.lyh.albumexplorer.feature.core.*
-import com.lyh.albumexplorer.feature.core.R
 import com.lyh.albumexplorer.feature.core.ui.AppTopBar
 import com.lyh.albumexplorer.feature.core.ui.ErrorComponent
 import com.lyh.albumexplorer.feature.core.ui.LoadingComponent
@@ -68,7 +67,7 @@ fun AlbumListScreen(
                             .fillMaxSize()
                     ) {
                         state.data.forEach {
-                            item {
+                            item(key = { it.id }) {
                                 AlbumItemCard(albumUi = it, onClick = onNavigateToAlbum)
                             }
                         }

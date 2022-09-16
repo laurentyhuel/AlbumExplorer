@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +34,9 @@ fun AlbumRoute(
     viewModel: AlbumViewModel = getViewModel(),
     onBackClick: () -> Unit,
 ) {
-    viewModel.setAlbumId(id.toLong())
+    LaunchedEffect(id) {
+        viewModel.setAlbumId(id.toLong())
+    }
     val state by viewModel.album.collectAsStateWithLifecycle()
     AlbumScreen(
         modifier = modifier,
